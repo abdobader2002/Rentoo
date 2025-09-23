@@ -1,0 +1,498 @@
+﻿@using Rentoo.Domain.Entities
+@using System.IO
+@model Rentoo.Domain.Entities.UserDocument
+@{
+    ViewData["Title"] = RM.Global.YourDocuments;
+    Layout = "~/Views/Shared/_EndUserLayout.cshtml";
+}
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        body {
+            background-color: #f2f3f5;
+            color: #333;
+        }
+        /* Document page specific styles - properly scoped to avoid conflicts with layout */
+        .doc-dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f2f3f5;
+        }
+
+        .doc-dashboard-content {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .doc-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+            .doc-page-header h1 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+            }
+
+        .doc-nav-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .doc-nav-tab {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #777;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+            .doc-nav-tab:hover {
+                color: #ea001e;
+            }
+
+            .doc-nav-tab.active {
+                background-color: #ea001e;
+                color: #fff;
+            }
+
+            .doc-nav-tab i {
+                margin-right: 8px;
+            }
+
+        .doc-profile-section {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+            .doc-profile-section h2 {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 25px;
+                color: #333;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }
+
+        .doc-form-group {
+            margin-bottom: 20px;
+        }
+
+            .doc-form-group label {
+                font-weight: 500;
+                margin-bottom: 8px;
+                display: block;
+                color: #555;
+            }
+
+        .doc-form-control {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: 0.2s;
+            background-color: #f9f9f9;
+        }
+
+            .doc-form-control:focus {
+                border-color: #e91e63;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+                background-color: #fff;
+            }
+
+            .doc-form-control:disabled {
+                background-color: #f0f0f0;
+            }
+
+        .doc-text-danger {
+            font-size: 13px;
+            color: #e91e63;
+            margin-top: 5px;
+        }
+
+        .doc-btn {
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .doc-btn-primary {
+            background-color: #ea001e;
+            color: white !important;
+            border: none;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2);
+        }
+
+            .doc-btn-primary:hover {
+                background-color: #212529;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(233, 30, 99, 0.3);
+            }
+
+        .doc-btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+        }
+
+            .doc-btn-danger:hover {
+                background-color: #c82333;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+            }
+
+        .doc-document-preview {
+            display: inline-block;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+            .doc-document-preview img {
+                max-width: 200px;
+                max-height: 150px;
+                object-fit: contain;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+            }
+
+        .doc-alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .doc-alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .doc-alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .doc-alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .doc-alert-info {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .doc-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .doc-bg-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .doc-bg-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .doc-bg-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+
+<div class="doc-dashboard-container">
+    <div class="doc-dashboard-content">
+        <div class="doc-page-header">
+            <h1>@RM.Global.YourDocuments</h1>
+        </div>
+
+        <div class="doc-nav-tabs">
+            <a href="@Url.Action("ClientProfile", "ClientDashboard")" class="doc-nav-tab"><i class="fas fa-user"></i> @RM.Global.MyAccount</a>
+            <a href="@Url.Action("MyRequests", "ClientDashboard")" class="doc-nav-tab"><i class="fas fa-file-alt"></i> @RM.Global.MyRequests</a>
+            <a href="@Url.Action("YourDoucoment", "ClientDashboard")" class="doc-nav-tab active"><i class="fas fa-file-upload"></i> @RM.Global.YourDocuments</a>
+        </div>
+        @if (Model == null)
+        {
+            <div class="doc-alert doc-alert-info">
+                @RM.Global.NoDocuments
+            </div>
+        }
+        else
+        {
+            <div class="doc-profile-section">
+                <h2>@RM.Global.DocumentStatus</h2>
+                <div style="margin-bottom: 20px;">
+                    <h5>Status: <span class="doc-badge @(Model.Status == UserDocumentStatus.Accepted ? "doc-bg-success" : Model.Status == UserDocumentStatus.Rejected ? "doc-bg-danger" : "doc-bg-warning")">@Model.Status</span></h5>
+                    @if (Model.ReviewdAt.HasValue)
+                    {
+                        <p style="margin-top: 10px;">Reviewed on: @Model.ReviewdAt.Value.ToString("dd/MM/yyyy")</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ReviewNotes))
+                    {
+                        <p style="margin-top: 10px;">Review Notes: @Model.ReviewNotes</p>
+                    }
+                    @if (Model.Status == UserDocumentStatus.Pending)
+                    {
+                        <div class="doc-alert doc-alert-warning" style="margin-top: 15px;">
+                            @RM.Global.YourdocumentsarecurrentlyunderreviewYoucannotupdatethemuntiltheyareaccepted_
+                        </div>
+                    }
+                    else if (Model.Status == UserDocumentStatus.Rejected)
+                    {
+                        <div class="doc-alert doc-alert-danger" style="margin-top: 15px;">
+                            @RM.Global.YourdocumentshavebeenrejectedPleaseupdatethemwiththecorrectinformation.
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="doc-profile-section">
+            <h2> @RM.Global.DocumentInformation</h2>
+            <form id="document-form" asp-action="YourDoucoment" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="ID" />
+                <input type="hidden" asp-for="UserId" />
+
+                <!-- Store existing URLs in hidden fields to maintain their values -->
+                @if (!string.IsNullOrEmpty(Model?.NationalIDUrl))
+                {
+                    <input type="hidden" asp-for="NationalIDUrl" id="existingNationalIDUrl" />
+                }
+                @if (!string.IsNullOrEmpty(Model?.LicenseUrl))
+                {
+                    <input type="hidden" asp-for="LicenseUrl" id="existingLicenseUrl" />
+                }
+                
+                <div class="doc-form-group">
+                    <label asp-for="NationalIDNumber" class="control-label">@RM.Global.lbNationalID</label>
+                    <input asp-for="NationalIDNumber" class="doc-form-control" />
+                    <span asp-validation-for="NationalIDNumber" class="doc-text-danger"></span>
+                </div>
+
+                <div class="doc-form-group">
+                    <label asp-for="NationalIDUrl" class="control-label">@RM.Global.lbNationalIDImage</label>
+                    @if (!string.IsNullOrEmpty(Model?.NationalIDUrl))
+                    {
+                        <div class="doc-document-preview">
+                            <img src="~/@Model.NationalIDUrl" class="img-fluid" alt="National ID" />
+                        </div>
+                    }
+                    <input type="file" name="nationalIdFile" id="nationalIdFile" class="doc-form-control" accept="image/png, image/jpeg, image/jpg" />
+                    <small class="text-muted">Maximum file size: 5MB. Accepted formats: JPG, JPEG, PNG</small>
+                    <span asp-validation-for="NationalIDUrl" class="doc-text-danger"></span>
+                    <span id="nationalIdFile-error" class="doc-text-danger"></span>
+                </div>
+
+                <div class="doc-form-group">
+                    <label asp-for="LicenseUrl" class="control-label">@RM.Global.lbLicenseImage</label>
+                    @if (!string.IsNullOrEmpty(Model?.LicenseUrl))
+                    {
+                        <div class="doc-document-preview">
+                            <img src="~/@Model.LicenseUrl" class="img-fluid" alt="License" />
+                        </div>
+                    }
+                    <input type="file" name="licenseFile" id="licenseFile" class="doc-form-control" accept="image/png, image/jpeg, image/jpg" />
+                    <small class="text-muted">Maximum file size: 5MB. Accepted formats: JPG, JPEG, PNG</small>
+                    <span asp-validation-for="LicenseUrl" class="doc-text-danger"></span>
+                    <span id="licenseFile-error" class="doc-text-danger"></span>
+                </div>
+
+                <div class="doc-form-group">
+                    <label asp-for="Notes" class="control-label">@RM.Global.AdditionalNotes</label>
+                    <textarea asp-for="Notes" class="doc-form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="doc-text-danger"></span>
+                </div>
+
+                <div class="doc-form-group" style="display: flex; gap: 10px;">
+                    @if (Model == null || Model.Status != UserDocumentStatus.Pending)
+                    {
+                        <button type="submit" class="doc-btn doc-btn-primary" id="submitButton">
+                            @(Model == null ? "Upload Documents" : "Update Documents")
+                        </button>
+                    }
+                    @if (Model?.ID > 0)
+                    {
+                        <a asp-action="DeleteDocument" asp-route-id="@Model.ID" class="doc-btn doc-btn-primary" onclick="return confirm('Are you sure you want to delete your documents?')">@RM.Global.DeleteDocuments</a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Add custom validation for file inputs
+            $.validator.addMethod('fileSize', function (value, element, param) {
+                if (element.files.length === 0) return true;
+                return element.files[0].size <= param;
+            }, 'File size should be less than {0} bytes');
+
+            $.validator.addMethod('fileType', function (value, element, param) {
+                if (element.files.length === 0) return true;
+                var extension = element.files[0].name.split('.').pop().toLowerCase();
+                return param.split(',').indexOf(extension) !== -1;
+            }, 'Please upload a valid file type. Allowed types: {0}');
+
+            // Check if model exists and has existing files
+            var hasExistingNationalId = $('#existingNationalIDUrl').length > 0;
+            var hasExistingLicense = $('#existingLicenseUrl').length > 0;
+            var isEditMode = '@Model?.ID' > 0;
+            var isPending = '@(Model?.Status == UserDocumentStatus.Pending)' === 'True';
+
+            // Initialize form validation
+            var validator = $('#document-form').validate({
+                rules: {
+                    NationalIDNumber: {
+                        required: true,
+                        minlength: 14,
+                        maxlength: 14,
+                        pattern: /^\d{14}$/
+                    },
+                    nationalIdFile: {
+                        fileSize: 5 * 1024 * 1024, // 5MB
+                        fileType: 'jpg,jpeg,png',
+                        required: function() {
+                            // Only required if no existing image
+                            return !hasExistingNationalId && !isEditMode;
+                        }
+                    },
+                    licenseFile: {
+                        fileSize: 5 * 1024 * 1024, // 5MB
+                        fileType: 'jpg,jpeg,png',
+                        required: function() {
+                            // Only required if no existing image
+                            return !hasExistingLicense && !isEditMode;
+                        }
+                    }
+                },
+                messages: {
+                    NationalIDNumber: {
+                        required: "National ID Number is required",
+                        minlength: "National ID Number must be exactly 14 digits",
+                        maxlength: "National ID Number must be exactly 14 digits",
+                        pattern: "National ID Number must contain exactly 14 digits"
+                    },
+                    nationalIdFile: {
+                        required: "Please upload your National ID document",
+                        fileSize: "File size should be less than 5MB",
+                        fileType: "Please upload a valid image file (JPG, JPEG, PNG)"
+                    },
+                    licenseFile: {
+                        required: "Please upload your License document",
+                        fileSize: "File size should be less than 5MB",
+                        fileType: "Please upload a valid image file (JPG, JPEG, PNG)"
+                    }
+                },
+                errorElement: 'span',
+                errorClass: 'doc-text-danger',
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element);
+                }
+            });
+
+            // Validate files on change
+            $('#document-form input[type="file"]').on('change', function () {
+                $(this).valid();
+
+                // Clear custom error messages when a file is selected
+                var fileId = $(this).attr('id');
+                $('#' + fileId + '-error').text('');
+            });
+
+            // Form submission validation
+            $('#document-form').on('submit', function(e) {
+                // Only perform this validation if not in pending status
+                if (isPending) {
+                    return false;
+                }
+
+                var isValid = true;
+
+                // For new submissions, validate both files
+                if (!isEditMode) {
+                    // Check National ID document
+                    if ($('#nationalIdFile')[0].files.length === 0) {
+                        $('#nationalIdFile-error').text('National ID Document is required');
+                        isValid = false;
+                    }
+
+                    // Check License document
+                    if ($('#licenseFile')[0].files.length === 0) {
+                        $('#licenseFile-error').text('License Document is required');
+                        isValid = false;
+                    }
+                }
+
+                // For existing documents where status is Rejected, also validate
+                if (isEditMode && '@(Model?.Status == UserDocumentStatus.Rejected)' === 'True') {
+                    // Check National ID document only if no existing file
+                    if (!hasExistingNationalId && $('#nationalIdFile')[0].files.length === 0) {
+                        $('#nationalIdFile-error').text('National ID Document is required');
+                        isValid = false;
+                    }
+
+                    // Check License document only if no existing file
+                    if (!hasExistingLicense && $('#licenseFile')[0].files.length === 0) {
+                        $('#licenseFile-error').text('License Document is required');
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Disable form if status is pending - SCOPE FIXED to only affect the document form
+            if (isPending) {
+                $('#document-form input, #document-form textarea, #document-form select, #document-form button[type="submit"]').prop('disabled', true);
+                $('#document-form input[type="file"]').prop('disabled', true);
+            }
+        });
+    </script>
+}

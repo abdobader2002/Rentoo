@@ -1,0 +1,161 @@
+﻿@model Rentoo.Domain.Entities.User
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+@{
+    ViewData["Title"] = "Admin Profile";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">@RM.Global.lbProfile</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("UserProfile", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <div class="row">
+                            <!-- Profile Picture Section -->
+                            <div class="col-md-3 text-center mb-4">
+                                <div class="profile-image-container">
+                                    <img src="@(string.IsNullOrEmpty(Model.UserImage) ? "/images/default-profile.png" : Url.Content($"~/{Model.UserImage}"))"
+                                         alt="@RM.Global.lbProfilePicture"
+                                         class="img-fluid rounded-circle profile-image mb-3"
+                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                    <div class="mt-2">
+                                        <label class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-camera"></i> @RM.Global.lbChangePhoto
+                                            <input type="file" name="ProfileImageFile" style="display: none;" accept="image/png, image/jpeg, image/jpg, image/gif">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Profile Information -->
+                            <div class="col-md-9">
+                                <div class="row">
+                                    @Html.HiddenFor(model => model.Id)
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.FirstName</label>
+                                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.LastName</label>
+                                        @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.Email</label>
+                                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @type = "email" })
+                                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.BirthDate</label>
+                                        @Html.TextBoxFor(model => model.BirthDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                                        @Html.ValidationMessageFor(model => model.BirthDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.lbPhoneNumber</label>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control" })
+                                        </div>
+                                        @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.lbAddress</label>
+                                        @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <!-- Change Password Section -->
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <button type="button" class="btn btn-warning btn-sm" id="togglePasswordFields">
+                                            <i class="fas fa-key"></i> @RM.Global.lbChangePassword ?
+                                        </button>
+                                        <small class="form-text text-muted d-block mt-1">
+                                            @RM.Global.lbPass
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="row" id="passwordFields" style="display: none;">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.lbNewPassword</label>
+                                        <input type="password" name="NewPassword" class="form-control" />
+                                        <span class="text-danger">@Html.ValidationMessage("NewPassword")</span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">@RM.Global.lbConfirmNewPassword</label>
+                                        <input type="password" name="ConfirmPassword" class="form-control" />
+                                        <span class="text-danger">@Html.ValidationMessage("ConfirmPassword")</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> @RM.Global.lbSaveChanges
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Profile image preview
+            const profileImageInput = document.querySelector('input[type="file"]');
+            const profileImage = document.querySelector('.profile-image');
+
+            profileImageInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        profileImage.src = e.target.result;
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Toggle password fields
+            const toggleBtn = document.getElementById('togglePasswordFields');
+            const passwordFields = document.getElementById('passwordFields');
+
+            // Debug logging
+            console.log('Toggle button found:', toggleBtn);
+            console.log('Password fields div found:', passwordFields);
+
+            if (toggleBtn && passwordFields) {
+                toggleBtn.addEventListener('click', function () {
+                    console.log('Toggle button clicked');
+                    if (passwordFields.style.display === 'none') {
+                        passwordFields.style.display = 'flex';
+                        console.log('Password fields shown');
+                    } else {
+                        passwordFields.style.display = 'none';
+                        console.log('Password fields hidden');
+                    }
+                });
+            } else {
+                console.error('Toggle button or password fields not found!');
+            }
+        });
+    </script>
+}

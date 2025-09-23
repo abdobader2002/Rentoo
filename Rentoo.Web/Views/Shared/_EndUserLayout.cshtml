@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+@using Rentoo.Domain.Shared;
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<Rentoo.Domain.Entities.User> UserManager
+@{
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value + Context.Request.QueryString.Value}";
+    string classEn = CultureConfiguration.IsArabic ? "" : "header-en";
+    string menuLeft = CultureConfiguration.IsArabic ? " direction: rtl" :  " direction:ltr ";
+}
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="copyright" content="MEWA" />
+    <meta name="author" content="MEWA" />
+    <meta name="robots" content="INDEX,FOLLOW" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" src="~/favicon.ico" />
+
+    <title>@ViewData["Title"] </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+
+    <!-- Libraries Stylesheet -->
+	<link href="~/assets/lib/animate/animate.min.css" rel="stylesheet">
+
+    <link href="~/assets/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+
+    <!-- Customized Bootstrap Stylesheet -->
+	<link href="~/assets/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Template Stylesheet -->
+	<link href="~/assets/css/style.css" rel="stylesheet" />
+
+
+
+    @RenderSection("Styles", required: false)
+
+    <script src="~/assets/js/plugins/jquery.min.js"></script>
+    <style>
+        /* Custom style for toastr notifications */
+        #toast-container > .toast {
+            background-color: #333 !important; /* dark background */
+            color: #fff !important; /* white text */
+            box-shadow: 0 0 10px rgba(0,0,0,0.3); /* optional */
+        }
+
+        /* Optional: Customize success/info/warning/error specifically */
+        #toast-container > .toast-success {
+            background-color: #28a745 !important;
+            color: #fff !important;
+        }
+
+        #toast-container > .toast-info {
+            background-color: #17a2b8 !important;
+            color: #fff !important;
+        }
+
+        #toast-container > .toast-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        #toast-container > .toast-error {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+        }
+    </style>
+
+</head>
+<body id="page-top" style="@menuLeft">
+    <!-- Topbar Start -->
+    <div class="container-fluid topbar bg-secondary d-none d-xl-block w-100">
+        <div class="container">
+            <div class="row gx-0 align-items-center" style="height: 45px;">
+                <div class="col-lg-6 text-center text-lg-start mb-lg-0">
+                    <div class="d-flex flex-wrap">
+                        <a href="#" class="text-muted me-4"><i class="fas fa-map-marker-alt text-primary me-2"></i>Find A Location</a>
+                        <a href="tel:+01234567890" class="text-muted me-4"><i class="fas fa-phone-alt text-primary me-2"></i>+01234567890</a>
+                        <a href="mailto:example@gmail.com" class="text-muted me-0"><i class="fas fa-envelope text-primary me-2"></i>Example@gmail.com</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center text-lg-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <a href="#" class="btn btn-light btn-sm-square rounded-circle me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-light btn-sm-square rounded-circle me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn btn-light btn-sm-square rounded-circle me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="btn btn-light btn-sm-square rounded-circle me-0"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+    <!-- Navbar & Hero Start -->
+    <div class="container-fluid nav-bar sticky-top px-0 px-lg-4 py-2 py-lg-0">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <a href="@Url.Action("Index", "Home")" class="navbar-brand p-0">
+                    <h1 class="display-6 text-primary"><i class="fas fa-car-alt me-3"></i>Rentoo</h1>
+                    <!-- <img src="img/logo.png" alt="Logo"> -->
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto py-0">
+                        @* <a href="index.html" class="nav-item nav-link active">@RM.Global.Home</a>
+                        <a href="about.html" class="nav-item nav-link">@RM.Global.About</a>
+                        <a href="service.html" class="nav-item nav-link">@RM.Global.Service</a>
+                        <a href="contact.html" class="nav-item nav-link">@RM.Global.Contact</a> *@
+                    </div>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var user = await UserManager.GetUserAsync(User);
+                        if (user != null)
+                        {
+                            <div class="nav-item dropdown d-flex gap-2 align-items-center">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Hello, @user.FirstName
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    @if (User.IsInRole("Owner"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="UserDashboard" asp-action="UserProfile">Dashboard</a></li>
+                                    }
+                                    else if (User.IsInRole("Client"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="ClientDashboard" asp-action="ClientProfile">Dashboard</a></li>
+                                    }
+                                    else if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Dashboard</a></li>
+                                    }
+                                    <li>
+                                        <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                                <a asp-controller="home" asp-action="togglelanguage" asp-route-returnUrl="@returnUrl" class="btn btn-outline-light text-body btn-sm d-flex gap-2 align-items-center" id="btnToggle">
+                                    <span class="d-none d-lg-flex">@RM.Global.LanguageToggle</span>
+                                    <i class="hgi-stroke hgi-language-circle btn-icon"></i>
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-light text-body btn-sm d-flex gap-2 align-items-center" asp-action="Login" asp-controller="Account" id="btnToggle">
+                            <span class="d-none d-lg-flex"> @RM.Global.LogIn </span>
+                            <i class="hgi-stroke hgi-language-circle btn-icon"></i>
+                        </a>
+
+                        <a class="btn btn-outline-light text-body btn-sm d-flex gap-2 align-items-center" asp-action="Register" asp-controller="Account" id="btnToggle">
+                            <span class="d-none d-lg-flex"> @RM.Global.SignUp </span>
+                            <i class="hgi-stroke hgi-language-circle btn-icon"></i>
+                        </a>
+
+                        <a asp-controller="home" asp-action="togglelanguage" asp-route-returnUrl="@returnUrl" class="btn btn-outline-light text-body btn-sm d-flex gap-2 align-items-center" id="btnToggle">
+                            <span class="d-none d-lg-flex">@RM.Global.LanguageToggle</span>
+                            <i class="hgi-stroke hgi-language-circle btn-icon"></i>
+                        </a>
+                    }
+                    
+                    
+
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar & Hero End -->
+            @RenderBody()
+    <!-- Footer Start -->
+    <div class="container-fluid footer mt-5 wow fadeIn" data-wow-delay="0.2s">
+        <div class="container ">
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-6 col-xl-6">
+                    <div class="footer-item d-flex flex-column">
+                        <div class="footer-item">
+                            <h4 class="text-white mb-4">About Us</h4>
+                            <p class="mb-3">we believe that your journey should be as enjoyable and stress-free as your destination.
+                                We are committed to delivering the highest level of service, safety, and satisfaction.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @* <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <h4 class="text-white mb-4">Quick Links</h4>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> About</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Cars</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Car Types</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Team</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Contact us</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Terms & Conditions</a>
+                    </div>
+                </div> *@
+       
+                <div class="col-md-3 col-lg-3 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <h4 class="text-white mb-4">Contact Info</h4>
+                        <a href="#"><i class="fa fa-map-marker-alt me-2"></i> 123 Street, New York, USA</a>
+                        <a href="mailto:info@example.com"><i class="fas fa-envelope me-2"></i> info@example.com</a>
+                        <a href="tel:+012 345 67890"><i class="fas fa-phone me-2"></i> +012 345 67890</a>
+                        <a href="tel:+012 345 67890" class="mb-3"><i class="fas fa-print me-2"></i> +012 345 67890</a>
+                        <div class="d-flex">
+                            <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-facebook-f text-white"></i></a>
+                            <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-twitter text-white"></i></a>
+                            <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-instagram text-white"></i></a>
+                            <a class="btn btn-secondary btn-md-square rounded-circle me-0" href=""><i class="fab fa-linkedin-in text-white"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+    <!-- Copyright Start -->
+    <div class="container-fluid copyright py-4">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-md-0">
+                    <span class="text-body"><a href="#" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>Rentoo</a>, All right reserved.</span>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/lib/wow/wow.min.js"></script>
+    <script src="~/assets/lib/easing/easing.min.js"></script>
+    <script src="~/assets/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/assets/lib/counterup/counterup.min.js"></script>
+    <script src="~/assets/lib/owlcarousel/owl.carousel.min.js"></script>
+
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+    <script>
+        $(document).ready(function () {
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>toastr.success('@TempData["SuccessMessage"]');</text>
+        }
+        else if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error('@TempData["ErrorMessage"]');</text>
+        }
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right", // change position here
+            "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000", // toast disappears after 5 seconds
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

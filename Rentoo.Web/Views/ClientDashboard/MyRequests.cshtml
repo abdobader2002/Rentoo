@@ -1,0 +1,833 @@
+﻿@using Rentoo.Domain.Entities
+@model IEnumerable<Rentoo.Domain.Entities.Request>
+
+@{
+    Layout = "~/Views/Shared/_EndUserLayout.cshtml";
+    ViewData["Title"] = @RM.Global.MyRequests;
+}
+
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://www.paypal.com/sdk/js?client-id=AV5YIoSUVpHVfqMor2l2gu6A69Jxjzjt0reSOAGQ-rVNZExxXaEHeSgty5dCEv1oueBmrBn8Li-hMFj4&currency=USD"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f2f3f5;
+            color: #333;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+            .page-header h1 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+            }
+
+        .nav-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-tab {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #777;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+            .nav-tab:hover {
+                color: #ea001e;
+            }
+
+            .nav-tab.active {
+                background-color: #ea001e;
+                color: #fff;
+            }
+
+            .nav-tab i {
+                margin-right: 8px;
+            }
+
+        .request-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+            .request-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .request-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .request-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .request-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .detail-item i {
+                color: #e91e63;
+            }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #e91e63;
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background-color: #d81b60;
+            }
+
+        .btn-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+            .btn-success:hover {
+                background-color: #218838;
+            }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+            .btn-danger:hover {
+                background-color: #c82333;
+            }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+
+            .btn-info:hover {
+                background-color: #138496;
+            }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .modal.show .modal-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+            .close-button:hover {
+                color: #333;
+                background-color: #f5f5f5;
+            }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .star {
+            font-size: 24px;
+            cursor: pointer;
+            color: #ddd;
+        }
+
+            .star.active {
+                color: #ffc107;
+            }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* PayPal Button Styles */
+        .paypal-button-container {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .payment-modal-body {
+            text-align: center;
+        }
+
+        .payment-details {
+            margin: 15px 0;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .payment-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+            .payment-detail:last-child {
+                border-bottom: none;
+                font-weight: bold;
+            }
+
+        /* Loading spinner */
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #0070ba;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+
+
+
+        /* Success message */
+        #payment-success {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .success-icon {
+            color: #28a745;
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        #payment-success h3 {
+            color: #28a745;
+            margin-bottom: 8px;
+        }
+
+        #transaction-id {
+            font-weight: 600;
+            color: #0070ba;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1>@RM.Global.MyRequests</h1>
+            </div>
+
+            <div class="nav-tabs">
+                <a href="@Url.Action("ClientProfile", "ClientDashboard")" class="nav-tab"><i class="fas fa-user"></i> @RM.Global.MyAccount</a>
+                <a href="@Url.Action("MyRequests", "ClientDashboard")" class="nav-tab active"><i class="fas fa-file-alt"></i> @RM.Global.MyRequests</a>
+                <a href="@Url.Action("YourDoucoment", "ClientDashboard")" class="nav-tab"><i class="fas fa-file-upload"></i> @RM.Global.YourDocuments</a>
+            </div>
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    @RM.Global.Youdon_thaveanyrentalrequestsyet_
+                </div>
+            }
+            else
+            {
+                foreach (var request in Model)
+                {
+                    <div class="request-card">
+                        <div class="request-header">
+                            <h3 class="request-title">@RM.Global.RequestDetails</h3>
+                            <span class="request-status status-@request.Status.ToString().ToLower()">
+                                @(request.Status == RequestStatus.Pending ? RM.Global.Pending :
+                                    request.Status == RequestStatus.Accepted ? RM.Global.Accepted :
+                                    request.Status == RequestStatus.Rejected ? RM.Global.Rejected :
+                                    RM.Global.Completed)
+                            </span>
+                        </div>
+                        <div class="request-details">
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>@request.User.FirstName @request.User.LastName</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@request.StartDate - @request.EndDate</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@request.pickupAddress</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>@request.TotalPrice EGP</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-car"></i>
+                                <span>@(request.WithDriver ? "With Driver" : "Without Driver")</span>
+                            </div>
+                        </div>
+
+                        @if (request.Status == RequestStatus.Accepted)
+                        {
+                            <div class="request-actions">
+                                <button class="btn btn-primary" onclick="openPaymentModal(@request.ID, @request.TotalPrice)">
+                                    <i class="fab fa-paypal"></i> Pay with PayPal
+                                </button>
+                            </div>
+                        }
+                        else if (request.Status == RequestStatus.Completed)
+                        {
+                            // Check if a review already exists for this request
+                            var reviewedRequestIds = ViewBag.ReviewedRequestIds as HashSet<int>;
+                            if (reviewedRequestIds == null || !reviewedRequestIds.Contains(request.ID))
+                            {
+                                <div class="request-actions">
+                                    <button class="btn btn-info" onclick="openReviewModal(@request.ID)">
+                                        <i class="fas fa-star"></i> @RM.Global.AddReview
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="request-actions">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-check-circle"></i> @RM.Global.Youhavealreadyreviewedthisrequest.
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeReviewModal()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="modal-title">@RM.Global.AddReview</h3>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm" asp-action="AddReview" method="post" onsubmit="return validateReviewForm()">
+                    <input type="hidden" id="requestId" name="requestId" />
+
+                    <div class="form-group">
+                        <label>@RM.Global.Rating</label>
+                        <div class="rating-stars">
+                            <i class="fas fa-star star" data-rating="1"></i>
+                            <i class="fas fa-star star" data-rating="2"></i>
+                            <i class="fas fa-star star" data-rating="3"></i>
+                            <i class="fas fa-star star" data-rating="4"></i>
+                            <i class="fas fa-star star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" value="5" />
+                        <span id="ratingError" class="text-danger" style="display: none; color: #dc3545; font-size: 14px;">@RM.Global.Pleaseselectarating</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <textarea id="comment" name="comment" class="form-control" placeholder="Share your experience with this rental..."></textarea>
+                        <span id="commentError" class="text-danger" style="display: none; color: #dc3545; font-size: 14px;">@RM.Global.Pleaseprovideacomment</span>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" onclick="closeReviewModal()">@RM.Global.Cancel</button>
+                        <button type="submit" class="btn btn-success">@RM.Global.SubmitReview</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal (Minimized) -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closePaymentModal()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="modal-title">Payment</h3>
+            </div>
+            <div class="modal-body payment-modal-body">
+                <div class="payment-details">
+                    <div class="payment-detail">
+                        <span>Total</span>
+                        <span id="total-price">0 EGP</span>
+                    </div>
+                    <div class="payment-detail">
+                        <span>Total in USD</span>
+                        <span id="usd-amount">0 USD</span>
+                    </div>
+                </div>
+                <div id="paypal-button-container" class="paypal-button-container"></div>
+                <div id="payment-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Processing payment...</p>
+                </div>
+                <div id="payment-success" style="display: none;">
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <h3>Payment Successful!</h3>
+                    <p>Transaction ID: <span id="transaction-id"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="closePaymentModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the modals
+        var reviewModal = document.getElementById("reviewModal");
+        var paymentModal = document.getElementById("paymentModal");
+        var currentRequestId = null;
+
+        // Function to open the review modal
+        function openReviewModal(requestId) {
+            document.getElementById("requestId").value = requestId;
+            reviewModal.style.display = "flex";
+            // Add a small delay to allow the display change to take effect
+            setTimeout(() => {
+                reviewModal.classList.add("show");
+            }, 10);
+
+            // Reset the form
+            document.getElementById("rating").value = "5";
+            document.getElementById("comment").value = "";
+
+            // Reset error messages
+            document.getElementById("ratingError").style.display = "none";
+            document.getElementById("commentError").style.display = "none";
+
+            // Reset stars
+            var stars = document.querySelectorAll(".star");
+            stars.forEach(function(star) {
+                star.classList.remove("active");
+            });
+
+            // Set all stars as active (default 5 stars)
+            for (var i = 0; i < 5; i++) {
+                stars[i].classList.add("active");
+            }
+        }
+
+        // Function to close the review modal
+        function closeReviewModal() {
+            reviewModal.classList.remove("show");
+            // Wait for the transition to complete before hiding the modal
+            setTimeout(() => {
+                reviewModal.style.display = "none";
+            }, 300);
+        }
+
+        // Function to convert EGP to USD
+        function convertEGPtoUSD(egpAmount) {
+            // Fixed rate (1 USD = 30 EGP)
+            const exchangeRate = 30;
+            return (egpAmount / exchangeRate).toFixed(2);
+        }
+
+        // Update the payment modal
+        function openPaymentModal(requestId, totalPrice) {
+            currentRequestId = requestId;
+            const usdAmount = convertEGPtoUSD(totalPrice);
+
+            // Update payment details - simplified to just show totals
+            document.getElementById("total-price").textContent = totalPrice + " EGP";
+            document.getElementById("usd-amount").textContent = usdAmount + " USD";
+
+            // Display modal
+            paymentModal.style.display = "flex";
+            setTimeout(() => {
+                paymentModal.classList.add("show");
+            }, 10);
+
+            // Initialize PayPal button
+            initPayPalButton(totalPrice);
+        }
+
+        // Function to close the payment modal
+        function closePaymentModal() {
+            paymentModal.classList.remove("show");
+            setTimeout(() => {
+                paymentModal.style.display = "none";
+            }, 300);
+        }
+
+        // Initialize PayPal button
+        function initPayPalButton(amount) {
+            // Clear existing buttons first
+            document.getElementById('paypal-button-container').innerHTML = '';
+
+            // Convert amount to USD
+            const usdAmount = convertEGPtoUSD(amount);
+
+            paypal.Buttons({
+                style: {
+                    shape: 'rect',
+                    color: 'blue',
+                    layout: 'vertical',
+                    label: 'pay'
+                },
+
+                createOrder: function(data, actions) {
+                    // Show loading spinner
+                    document.getElementById('payment-loading').style.display = 'block';
+                    document.getElementById('paypal-button-container').style.display = 'none';
+
+                    return actions.order.create({
+                        purchase_units: [{
+                            description: 'Rental Payment',
+                            amount: {
+                                currency_code: 'USD',
+                                value: usdAmount
+                            }
+                        }]
+                    }).catch(function(error) {
+                        console.error('Error creating order:', error);
+                        document.getElementById('payment-loading').style.display = 'none';
+                        document.getElementById('paypal-button-container').style.display = 'block';
+                        alert('Error creating payment order. Please try again.');
+                    });
+                },
+
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        // Hide loading spinner
+                        document.getElementById('payment-loading').style.display = 'none';
+
+                        // Show success message
+                        document.getElementById('transaction-id').textContent = details.id;
+                        document.getElementById('payment-success').style.display = 'block';
+
+                        // Send the payment confirmation to the server
+                        completePayment(currentRequestId, details.id);
+
+                        // Set a timer to close the modal after success
+                        setTimeout(() => {
+                            closePaymentModal();
+                            // Refresh the page to show updated status
+                            window.location.reload();
+                        }, 3000);
+                    }).catch(function(error) {
+                        console.error('Error capturing payment:', error);
+                        document.getElementById('payment-loading').style.display = 'none';
+                        document.getElementById('paypal-button-container').style.display = 'block';
+                        alert('Error processing payment. Please try again.');
+                    });
+                },
+
+                onCancel: function(data) {
+                    // Hide loading spinner if payment is cancelled
+                    document.getElementById('payment-loading').style.display = 'none';
+                    document.getElementById('paypal-button-container').style.display = 'block';
+                },
+
+                onError: function(err) {
+                    // Hide loading spinner
+                    document.getElementById('payment-loading').style.display = 'none';
+                    document.getElementById('paypal-button-container').style.display = 'block';
+                    alert('Payment error. Please try again.');
+                }
+            }).render('#paypal-button-container');
+        }
+
+        // Function to send payment completion to server
+        function completePayment(requestId, transactionId) {
+            // Get the anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            fetch('/ClientDashboard/CompletePayment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    // Add the anti-forgery token if available
+                    ...(token && { 'RequestVerificationToken': token })
+                },
+                body: JSON.stringify({
+                    requestId: requestId,
+                    transactionId: transactionId
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('Payment status updated successfully');
+                } else {
+                    console.error('Failed to update payment status:', data.message);
+                    alert('There was an error updating your payment status. Please contact support.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error connecting to the server. Please try again later.');
+            });
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == reviewModal) {
+                closeReviewModal();
+            } else if (event.target == paymentModal) {
+                closePaymentModal();
+            }
+        }
+
+        // Handle star rating
+        var stars = document.querySelectorAll(".star");
+        stars.forEach(function(star) {
+            star.addEventListener("click", function() {
+                var rating = this.getAttribute("data-rating");
+                document.getElementById("rating").value = rating;
+
+                // Update star display
+                stars.forEach(function(s) {
+                    s.classList.remove("active");
+                });
+
+                for (var i = 0; i < rating; i++) {
+                    stars[i].classList.add("active");
+                }
+            });
+        });
+
+        // Form validation function
+        function validateReviewForm() {
+            var isValid = true;
+            var rating = document.getElementById("rating").value;
+            var comment = document.getElementById("comment").value.trim();
+
+            // Validate rating
+            if (!rating || rating < 1 || rating > 5) {
+                document.getElementById("ratingError").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("ratingError").style.display = "none";
+            }
+
+            // Validate comment
+            if (!comment) {
+                document.getElementById("commentError").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("commentError").style.display = "none";
+            }
+
+            return isValid;
+        }
+    </script>
+</body>

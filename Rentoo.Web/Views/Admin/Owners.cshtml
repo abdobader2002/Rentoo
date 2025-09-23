@@ -1,0 +1,77 @@
+﻿@model IPagedList<Rentoo.Domain.Entities.User>
+@using X.PagedList.Mvc.Core
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+@{
+    ViewData["Title"] = "Owners";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary mb-0">@RM.Global.lbOwnersList</h2>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>@RM.Global.lbFirstName</th>
+                        <th>@RM.Global.lbLastName</th>
+                        <th>@RM.Global.lbBirthDate</th>
+                        <th>@RM.Global.lbAddress</th>
+                        <th>@RM.Global.lbPhoneNumber</th>
+                        <th>@RM.Global.lbCars</th>
+                        <th>@RM.Global.lbActions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int rowIndex = (Model.PageNumber - 1) * Model.PageSize;
+                    }
+
+                    @foreach (var owner in Model)
+                    {
+                        rowIndex++;
+                        <tr>
+                            <td>@rowIndex</td>
+                            <td>@owner.FirstName</td>
+                            <td>@owner.LastName</td>
+                            <td>@owner.BirthDate.ToString("yyyy-MM-dd")</td>
+                            <td>@owner.Address</td>
+                            <td>@owner.PhoneNumber</td>
+                            <td>
+                                @owner.Cars?.Count 
+                            </td>
+                            <td>
+                                <form asp-action="Delete" asp-route-id="@owner.Id" method="post" class="delete-form d-inline">
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn">@RM.Global.lbDelete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("Owners", new { page }), new PagedListRenderOptions
+   {
+       LiElementClasses = new[] { "page-item" },
+       PageClasses = new[] { "page-link" },
+       UlElementClasses = new[] { "pagination" },
+       DisplayLinkToFirstPage = PagedListDisplayMode.Never,
+       DisplayLinkToLastPage = PagedListDisplayMode.Never,
+       DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+       DisplayLinkToNextPage = PagedListDisplayMode.Always,
+       LinkToPreviousPageFormat = $"« {RM.Global.lbPrev}",
+       LinkToNextPageFormat = $"{RM.Global.lbNext}»",
+       MaximumPageNumbersToDisplay = 5,
+       DisplayEllipsesWhenNotShowingAllPageNumbers = true
+   })
+    </div>
+</div>
+
+@await Html.PartialAsync("_DeleteConfirmationScript")

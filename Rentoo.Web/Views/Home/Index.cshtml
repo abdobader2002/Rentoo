@@ -1,0 +1,364 @@
+﻿@{
+	Layout = "_EndUserLayout";
+}
+@{
+	var Cars = ViewBag.Cars as List<Rentoo.Domain.Entities.Car>;
+}
+@using RM = Rentoo.Domain.Shared.Localization.Global;
+@{
+	var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value + Context.Request.QueryString.Value}";
+	string classEn = CultureConfiguration.IsArabic ? "" : "header-en";
+	string menuLeft = CultureConfiguration.IsArabic ? " direction: rtl" : " direction:ltr ";
+}
+<style>
+	/* .card {
+	display: inline-block;
+	width: 200px;
+	height: 100px;
+	margin: 5px;
+	background-color: #f3f3f3;
+	text-align: center;
+	line-height: 100px;
+	border: 1px solid #ccc;
+	} */
+
+	#pagination button {
+	margin: 3px;
+	padding: 5px 10px;
+	cursor: pointer;
+	}
+
+	#about h3 {
+	color: #dc3545;
+	}
+	#pagination button.active {
+	background-color: #dc3545;
+	color: white;
+	}
+
+	#pagination button.arrow {
+	font-weight: bold;
+	}
+</style>
+
+<!-- Carousel Start -->
+<div class="header-carousel">
+	<div id="carouselId" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+		<div class="carousel-inner" role="listbox">
+			<div class="carousel-item active">
+				<img src="~/assets/img/carousel-2.jpg" class="img-fluid w-100" alt="First slide" />
+				<div class="carousel-caption " style="inset-inline-start: 0;inset-inline-end: auto;">
+					<div class="container py-5">
+						<div class="row g-5">
+							<div class="col-12 fadeInRight animated" data-animation="fadeInRight" data-delay="1s" style="animation-delay: 1s;">
+								<div class="bg-secondary rounded p-5">
+									<h4 class="text-white mb-4">@RM.Global.SearchAboutCar</h4>
+									<form action="home/Search" method="get">
+										<div class="row g-3">
+											<div class="col-6">
+												<select class="form-select" aria-label="Default select example" asp-items="ViewBag.CarsModel" name="Model">
+													<option value="">@RM.Global.SelectYourCartype</option>
+
+												</select>
+											</div>
+
+											<div class="col-6">
+												<select class="form-select" id="yearSelect" aria-label="Default select example" name="FactoryYear">
+													<option value="">@RM.Global.FactoryYear</option>
+
+												</select>
+											</div>
+
+											<div class="col-6">
+												<select class="form-select" aria-label="Default select example" name="Transmission">
+													<option value="">@RM.Global.Transmission</option>
+													<option value="Aotomatic">Aotomatic</option>
+													<option value="Manualy">Manualy</option>
+												</select>
+											</div>
+											<div class="col-6">
+												<select class="form-select" aria-label="Default select example" asp-items="ViewBag.CarsLocation" name="Address">
+													<option value="">@RM.Global.Location</option>
+
+												</select>
+											</div>
+
+											<div class="col-12">
+												<button class="btn btn-light w-100 py-2">@RM.Global.Search</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Carousel End -->
+<!-- Car categories Start -->
+<div class="container-fluid categories p-5">
+	<div class="container pb-5">
+		<div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 800px;">
+			<h1 class="display-5 text-capitalize mb-3">Cars <span class="text-primary">Categories</span></h1>
+		</div>
+		@if (Cars != null && Cars.Count > 0)
+		{
+			<div class="row row-cols-1 row-cols-md-3 g-4" id="card-container">
+				@foreach (var item in Cars) 
+				{ 
+
+					<div class="col Carcard">
+						<div class="card h-100 shadow ">
+							@{
+								var firstImage = item.Images?.FirstOrDefault();
+							}
+							<img src="/@(firstImage?.ImageUrl ?? "images/default-car.jpg")"
+								 class="card-img-top"
+								 alt="Car Image"
+								 style="height: 200px;width:200px; object-fit: cover;">
+							<div class="card-body">
+								<h5 class="card-title">@item.Model <span style="font-size: 14px; color: red;">@item.FactoryYear</span> </h5> 
+								<ul class="list-unstyled small-text mb-2"> 
+									<li class="icon-text"><i class="bi bi-people-fill"></i> @item.Seats @RM.Global.Seats | <i class="bi bi-gear-fill"></i> @item.Transmission</li> 
+									<li class="icon-text"><i class="bi bi-geo-alt-fill"></i> <a href="#" class="text-decoration-none">@item.Address</a></li> 
+								</ul> 
+								<a asp-controller="Car" asp-action="Details" asp-route-id="@item.ID" class="btn btn-primary rounded-pill py-2 px-4">View Details</a> 
+							</div> 
+						</div> 
+					</div> 
+				}
+			</div>
+			<nav class="mt-3">
+				<ul id="pagination" class="pagination justify-content-center"></ul>
+			</nav>
+		}
+	</div>
+</div>
+<!-- Car categories End -->
+
+
+<div class="container-fluid bg-breadcrumb">
+	<div class="container text-center py-5" style="max-width: 900px;">
+		<h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInDown;">Our Services</h4>
+	</div>
+</div>
+<div class="container-fluid service py-5">
+	<div class="container py-5">
+		@if (CultureConfiguration.IsArabic)
+		{
+			<div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 800px; visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+				<h1 class="display-5 text-capitalize mb-3">Rentoo <span class="text-primary">Services</span></h1>
+				<p class="mb-0">
+					
+				</p>
+			</div>
+			<div class="row g-4">
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-road fa-2x"></i>
+						</div>
+						<h5 class="mb-3">مميزات تاجير سيارات</h5>
+						<p class="mb-0">
+							الحاجة إلى سيارة للإيجار تكون تحت تصرفك طوال اليوم أو الأسبوع أو الشهر صار أمرًا في غاية الأهمية لدى الكثير من
+
+							الاشخاص ، وهو من أولى الأوليات.
+						</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-money-bill-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">اختيار سيارة</h5>
+						<p class="mb-0">اختيار السيارة التي تناسب طبيعة عملك، وطبيعة المشاوير والأماكن التي ترغب في الذهاب إليها.</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-car-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">تنوع السيارات</h5>
+						<p class="mb-0">تنوع في السيارات المتاحة من حيث الحجم والقوة والأداء والأسعار.</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-clock fa-2x"></i>
+						</div>
+						<h5 class="mb-3">توفير الوقت الذي قد تحتاجه</h5>
+						<p class="mb-0">يمكنك تاجير السيارة المناسبة لك فى الوقت الذي تحتاجه مع خدمات اخري يمكن ان يوفرها لك المالك</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-building fa-2x"></i>
+						</div>
+						<h5 class="mb-3">شروط ايجار سيارات</h5>
+						<p class="mb-0">
+							إذا كنت ترغب في حجز سيارة للإيجار فكل ما عليك فعله هو التسجيل في موقع ، وملئ البيانات اللازمة، ومن ثم
+
+							اختيار السيارة التي تناسبك وتناسب احتياجاتك من خلال قوائم السيارات الموجودة على الموقع
+						</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							
+							<i class="fa fa-money-bill-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">توفير المال</h5>
+						<p class="mb-0">طلب السياررة من خلال الموقع يوفر لك الوقت والمال عن طريق ارسال طلب للمالك بتاجير السيارة خلال الموقع عن طريق رفع بياناتك وتحديد الوقت الذي تحتاج فيه السيارة دون اي مجهود كما يمكنك التواصل مع المالك مباشرة</p>
+					</div>
+				</div>
+			</div>
+		}
+		else{
+			<div class="text-center mx-auto pb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 800px; visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+				<h1 class="display-5 text-capitalize mb-3">Rentoo <span class="text-primary">Services</span></h1>
+				<p class="mb-0">
+					Discover a wide range of car rental services tailored to meet your personal and business needs.
+				</p>
+			</div>
+			<div class="row g-4">
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-road fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Car Rental Benefits</h5>
+						<p class="mb-0">
+							Having a rental car available for a day, week, or month is essential for many people, making it a top priority.
+						</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-money-bill-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Choose Your Car</h5>
+						<p class="mb-0">Select a car that fits your lifestyle, daily activities, and the destinations you plan to visit.</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-car-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Variety of Cars</h5>
+						<p class="mb-0">A wide selection of vehicles in different sizes, performance levels, and prices to suit your needs.</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-clock fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Save Valuable Time</h5>
+						<p class="mb-0">Rent the right car exactly when you need it, with additional services available from the owner.</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-building fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Rental Conditions</h5>
+						<p class="mb-0">
+							To rent a car, simply register on our site, complete the required information, then select a car that suits your needs from our listings.
+						</p>
+					</div>
+				</div>
+				<div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInUp;">
+					<div class="service-item p-4">
+						<div class="service-icon mb-4">
+							<i class="fa fa-money-bill-alt fa-2x"></i>
+						</div>
+						<h5 class="mb-3">Save Money</h5>
+						<p class="mb-0">
+							Renting through our platform saves you time and money. Just submit your details, select your rental time, and communicate directly with the car owner.
+						</p>
+					</div>
+				</div>
+			</div>
+
+
+		}
+	</div>
+</div>
+
+
+<script>
+    const yearSelect = document.getElementById('yearSelect');
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= 1900; y--) {
+      const option = document.createElement('option');
+      option.value = y;
+      option.textContent = y;
+      yearSelect.appendChild(option);
+    }
+     $(document).ready(function () {
+      const itemsPerPage = 9;
+      const visiblePageCount = 5;
+      const $cards = $("#card-container .Carcard");
+      const totalItems = $cards.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      let currentPage = 1;
+      let currentGroup = 1;
+
+	  function renderPagination() {
+		$("#pagination").empty();
+		const totalGroups = Math.ceil(totalPages / visiblePageCount);
+		const startPage = (currentGroup - 1) * visiblePageCount + 1;
+		const endPage = Math.min(startPage + visiblePageCount - 1, totalPages);
+
+		if (currentGroup > 1) {
+		  $("#pagination").append("<button class='arrow btn btn-danger' data-nav='prev'>&laquo;</button>");
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+		  $("#pagination").append(`<button class="btn" data-page='${i}'>${i}</button>`);
+		}
+
+		if (currentGroup < totalGroups) {
+		  $("#pagination").append("<button class='arrow btn btn-danger' data-nav='next'>&raquo;</button>");
+		}
+
+		$(`#pagination button[data-page='${currentPage}']`).addClass("active");
+	  }
+
+	  function showPage(page) {
+		currentPage = page;
+		$cards.hide();
+		const start = (page - 1) * itemsPerPage;
+		$cards.slice(start, start + itemsPerPage).show();
+		renderPagination();
+	  }
+
+	  $("#pagination").on("click", "button", function () {
+		const $btn = $(this);
+		if ($btn.hasClass("arrow")) {
+		  if ($btn.data("nav") === "prev") {
+			currentGroup--;
+		  } else {
+			currentGroup++;
+		  }
+		  renderPagination();
+		} else {
+		  const page = parseInt($btn.data("page"));
+		  showPage(page);
+		}
+	  });
+
+	  showPage(1);
+	});
+</script>
